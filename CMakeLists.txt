@@ -28,6 +28,12 @@ string(APPEND CMAKE_CXX_FLAGS " -Wshadow -Wnon-virtual-dtor")
 
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
+hunter_add_package(gumbo)
+find_package(gumbo CONFIG REQUIRED)
+hunter_add_package(Beast)
+find_package(Beast CONFIG REQUIRED)
+hunter_add_package(Boost COMPONENTS program_options)
+find_package(Boost CONFIG REQUIRED program_options)
 
 add_library(${PROJECT_NAME} STATIC
   # enum your files and delete this comment
@@ -42,8 +48,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
 )
-
-target_link_libraries(demo ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} gumbo::gumbo Beast::Beast Boost::program_options)
+target_link_libraries(demo ${PROJECT_NAME} gumbo::gumbo Beast::Beast Boost::program_options)
 
 if(BUILD_TESTS)
   add_executable(tests

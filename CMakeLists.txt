@@ -20,14 +20,19 @@ HunterGate(
   SHA1 "35fa55bc1dfcf9f4d7264f8bb26cd1759ce1ae07"
 )
 
-# TODO: rename project and delete this comment
-project(template VERSION 0.1.0)
+project(lab-09-producer-consumer VERSION 0.1.0)
 string(APPEND CMAKE_CXX_FLAGS " -pedantic -Werror -Wall -Wextra")
 string(APPEND CMAKE_CXX_FLAGS " -Wno-unused-command-line-argument")
 string(APPEND CMAKE_CXX_FLAGS " -Wshadow -Wnon-virtual-dtor")
 
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
+hunter_add_package(gumbo)
+find_package(gumbo CONFIG REQUIRED)
+hunter_add_package(Beast)
+find_package(Beast CONFIG REQUIRED)
+hunter_add_package(Boost COMPONENTS program_options)
+find_package(Boost CONFIG REQUIRED program_options)
 
 add_library(${PROJECT_NAME} STATIC
   # enum your files and delete this comment
@@ -42,8 +47,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>"
 )
-
-target_link_libraries(demo ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} gumbo::gumbo Beast::Beast Boost::program_options)
+target_link_libraries(demo ${PROJECT_NAME} gumbo::gumbo Beast::Beast Boost::program_options)
 
 if(BUILD_TESTS)
   add_executable(tests
@@ -56,12 +61,17 @@ if(BUILD_TESTS)
 endif()
 
 if(BUILD_COVERAGE)
-  set(ENABLE_COVERAGE ON CACHE BOOL "Enable coverage build." FORCE)
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/coverage/cmake")
-  find_package(codecov)
-  add_coverage(${PROJECT_NAME})
-  add_coverage(tests)
-  coverage_evaluate()
+    function(ENABLE_PROJECT_COVERAGE PROJECT)
+        target_compile_options(${PROJECT} PRIVATE --coverage)
+        target_link_libraries(${PROJECT} --coverage)
+    endfunction()
+
+    set(ENABLE_COVERAGE ON CACHE BOOL "Enable coverage build." FORCE)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/coverage/cmake")
+    find_package(codecov)
+    enable_project_coverage(${PROJECT_NAME})
+    enable_project_coverage(tests)
+    coverage_evaluate()
 endif()
 
 if(BUILD_DOCS)

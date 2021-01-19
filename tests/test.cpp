@@ -1,4 +1,4 @@
-// Copyright 2020 Your Name <your_email>
+// Copyright 2020 Burylov DEnis <burylov01@mail.ru>˚
 
 #include <gtest/gtest.h>
 
